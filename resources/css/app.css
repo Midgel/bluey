@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.text-bluey-primary {
+    color: hsl(var(--bluey-primary));
+}
+
+.from-bluey-primary {
+    --tw-gradient-from: hsl(var(--bluey-primary)) var(--tw-gradient-from-position);
+    --tw-gradient-to: hsl(var(--bluey-primary) / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+.to-bluey-secondary\/20 {
+    --tw-gradient-to: hsl(var(--bluey-secondary) / .2) var(--tw-gradient-to-position);
+}
+
+.from-bluey-light {
+    --tw-gradient-from: hsl(var(--bluey-light)) var(--tw-gradient-from-position);
+    --tw-gradient-to: hsl(var(--bluey-light) / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.to-bluey-secondary {
+    --tw-gradient-to: hsl(var(--bluey-secondary)) var(--tw-gradient-to-position);
+}
+
+.to-bluey-accent {
+    --tw-gradient-to: hsl(var(--bluey-accent)) var(--tw-gradient-to-position);
+}
+
+.from-bluey-secondary {
+    --tw-gradient-from: hsl(var(--bluey-secondary)) var(--tw-gradient-from-position);
+    --tw-gradient-to: hsl(var(--bluey-secondary) / 0) var(--tw-gradient-to-position);
+    --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.bg-gradient-to-r {
+    background-image: linear-gradient(to right, var(--tw-gradient-stops));
+}
+
+:root {
+    --background: 210 100% 98%;
+    --foreground: 220 15% 25%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 25%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 25%;
+    --primary: 220 90% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 100% 95%;
+    --secondary-foreground: 220 15% 25%;
+    --muted: 210 100% 96%;
+    --muted-foreground: 220 15% 60%;
+    --accent: 200 100% 85%;
+    --accent-foreground: 220 15% 25%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 100% 92%;
+    --input: 210 100% 95%;
+    --ring: 220 90% 56%;
+    --radius: 1rem;
+    --bluey-primary: 220 90% 56%;
+    --bluey-secondary: 200 100% 75%;
+    --bluey-accent: 45 100% 75%;
+    --bluey-light: 210 100% 95%;
+    --bluey-gradient: linear-gradient(135deg, hsl(220 90% 56%), hsl(200 100% 75%));
+    --bluey-gradient-soft: linear-gradient(180deg, hsl(210 100% 98%), hsl(210 100% 95%));
+    --shadow-soft: 0 4px 20px hsl(220 90% 56% / .1);
+    --shadow-medium: 0 8px 40px hsl(220 90% 56% / .15);
+    --transition-smooth: all .3s cubic-bezier(.4, 0, .2, 1);
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --background: 210 100% 98%;
+    --foreground: 220 15% 25%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 15% 25%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 15% 25%;
+    --primary: 220 90% 56%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 100% 95%;
+    --secondary-foreground: 220 15% 25%;
+    --muted: 210 100% 96%;
+    --muted-foreground: 220 15% 60%;
+    --accent: 200 100% 85%;
+    --accent-foreground: 220 15% 25%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 100% 92%;
+    --input: 210 100% 95%;
+    --ring: 220 90% 56%;
+    --radius: 1rem;
+    --bluey-accent: 45 100% 75%;
+    --bluey-primary: 220 90% 56%;
+    --bluey-secondary: 200 100% 75%;
+    --bluey-accent: 45 100% 75%;
+    --bluey-light: 210 100% 95%;
+    --bluey-gradient: linear-gradient(135deg, hsl(220 90% 56%), hsl(200 100% 75%));
+    --bluey-gradient-soft: linear-gradient(180deg, hsl(210 100% 98%), hsl(210 100% 95%));
+    --shadow-soft: 0 4px 20px hsl(220 90% 56% / .1);
+    --shadow-medium: 0 8px 40px hsl(220 90% 56% / .15);
+    --transition-smooth: all .3s cubic-bezier(.4, 0, .2, 1);
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+    --tw-border-spacing-x: 0;
+    --tw-border-spacing-y: 0;
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+    --tw-rotate: 0;
+    --tw-skew-x: 0;
+    --tw-skew-y: 0;
+    --tw-scale-x: 1;
+    --tw-scale-y: 1;
+    --tw-pan-x: ;
+    --tw-pan-y: ;
+    --tw-pinch-zoom: ;
+    --tw-scroll-snap-strictness: proximity;
+    --tw-gradient-from-position: ;
+    --tw-gradient-via-position: ;
+    --tw-gradient-to-position: ;
+    --tw-ordinal: ;
+    --tw-slashed-zero: ;
+    --tw-numeric-figure: ;
+    --tw-numeric-spacing: ;
+    --tw-numeric-fraction: ;
+    --tw-ring-inset: ;
+    --tw-ring-offset-width: 0px;
+    --tw-ring-offset-color: #fff;
+    --tw-ring-color: rgb(59 130 246 / .5);
+    --tw-ring-offset-shadow: 0 0 #0000;
+    --tw-ring-shadow: 0 0 #0000;
+    --tw-shadow: 0 0 #0000;
+    --tw-shadow-colored: 0 0 #0000;
+    --tw-blur: ;
+    --tw-brightness: ;
+    --tw-contrast: ;
+    --tw-grayscale: ;
+    --tw-hue-rotate: ;
+    --tw-invert: ;
+    --tw-saturate: ;
+    --tw-sepia: ;
+    --tw-drop-shadow: ;
+    --tw-backdrop-blur: ;
+    --tw-backdrop-brightness: ;
+    --tw-backdrop-contrast: ;
+    --tw-backdrop-grayscale: ;
+    --tw-backdrop-hue-rotate: ;
+    --tw-backdrop-invert: ;
+    --tw-backdrop-opacity: ;
+    --tw-backdrop-saturate: ;
+    --tw-backdrop-sepia: ;
+    --tw-contain-size: ;
+    --tw-contain-layout: ;
+    --tw-contain-paint: ;
+    --tw-contain-style: ;
+}
