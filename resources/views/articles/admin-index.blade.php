@@ -24,11 +24,10 @@
 
                 <div
                     class="group hover:shadow-xl transition-all duration-300 border-0 shadow-md hover:-translate-y-2 bg-card overflow-hidden cursor-pointer rounded-lg">
-                    {{-- <a href="/admin/articles/{{ $article->id }}/edit?token={{request()->token}}"> --}}
                         <a href="/admin/articles/show/{{ $article->id }}?token={{request()->token}}">
                             <div class="relative overflow-hidden">
                                 @if(!empty($article->image))
-                                    <img src="{{ $article->image }}" alt="{{ $article->title }}"
+                                    <img src="{{ Storage::disk('s3')->url($article->image) }}" alt="{{ $article->title }}"
                                         class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
                                 @else
                                     <img src="{{ asset('images/dog-care.jpg') }}" alt="{{ $article->title }}"

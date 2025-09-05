@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ArticleController;
 use App\Models\Post;
+use Illuminate\Support\Facades\Storage;
 
 //Rotas públicas
 // 1 - Rota para a página inicial
@@ -31,7 +32,7 @@ Route::post('/articles/{id}/increment-email', [ArticleController::class, 'increm
 Route::get('/admin/articles', [ArticleController::class, 'index'])->middleware('token.access');
 
 //2 - Rota para a página de detalhes de um único artigo ADMIN
-Route::get('/admin/articles/show/{id}', [ArticleController::class, 'admin_show'])->middleware('token.access');;
+Route::get('/admin/articles/show/{id}', [ArticleController::class, 'show'])->middleware('token.access');;
 
 //3 - Rota para a página de criação de um novo artigo (o formulário)
 Route::get('/admin/articles/create', [ArticleController::class, 'create'])->middleware('token.access');
@@ -43,7 +44,14 @@ Route::post('/admin/articles', [ArticleController::class, 'store'])->middleware(
 Route::get('/admin/articles/{id}/edit', [ArticleController::class, 'edit'])->middleware('token.access');
 
 //6 - Rota para processar a atualização de um artigo
-Route::post('/admin/articles/{id}', [ArticleController::class, 'update'])->middleware('token.access');
+Route::post('/admin/articles/update/{id}', [ArticleController::class, 'update'])->middleware('token.access');
 
 //7 - Rota para deletar um artigo
 Route::delete('/admin/articles/{id}', [ArticleController::class, 'destroy'])->middleware('token.access');
+
+
+
+Route::get('/test-s3', function () {
+    Storage::disk('s3')->put('teste.txt', 'Hello AWS S3!');
+    return 'Upload feito!';
+});

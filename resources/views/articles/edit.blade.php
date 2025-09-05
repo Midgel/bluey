@@ -13,9 +13,18 @@
     <main class="container mx-auto px-4 py-16">
         <div class="max-w-4xl mx-auto">
             <h1 class="text-4xl font-bold text-center mb-10">Editar Artigo</h1>
-
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
             <div class="bg-card shadow-lg rounded-lg p-8">
-                <form action="/admin/articles/{{ $article->id }}?token={{request()->token}}" method="POST" enctype="multipart/form-data">
+                <form action="/admin/articles/update/{{ $article->id }}?token={{request()->token}}" method="POST"
+                    enctype="multipart/form-data">
                     @csrf
                     <div class="space-y-6">
                         <div>
@@ -35,7 +44,7 @@
                                                                             file:rounded-full file:border-0
                                                                             file:text-sm file:font-semibold
                                                                             file:bg-blue-50 file:text-blue-700
-                                                                            hover:file:bg-blue-100"/>
+                                                                            hover:file:bg-blue-100" />
                             @error('image')
                                 <div class="text-sm text-red-600 mt-1">{{ $message }}</div>
                             @enderror

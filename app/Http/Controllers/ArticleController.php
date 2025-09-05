@@ -21,12 +21,19 @@ class ArticleController extends Controller
     {
         return view('about');
     }
-    
+
     // Método para exibir um único artigo e incrementar as visualizações
     public function show(string $id)
     {
         $article = Post::findOrFail($id);
-        $article->increment('qt_views');
+
+
+        if (request()->route()->uri() === 'admin/articles/show/{id}') {
+            return view('articles.admin-show', ['article' => $article]);
+        } else {
+            $article->increment('qt_views');
+        }
+
         return view('articles.show', compact('article'));
     }
 
@@ -51,7 +58,7 @@ class ArticleController extends Controller
         if ($request->has('search')) {
             $searchTerm = $request->get('search');
             $articles->where('title', 'like', "%{$searchTerm}%")
-                     ->orWhere('body', 'like', "%{$searchTerm}%");
+                ->orWhere('body', 'like', "%{$searchTerm}%");
         }
 
         $articles = $articles->get();
@@ -64,14 +71,13 @@ class ArticleController extends Controller
         // Por padrão, exibe a view pública
         return view('articles.index', ['articles' => $articles]);
     }
-    
+
     public function create()
     {
         $categories = Category::all();
         return view('articles.create', ['categories' => $categories]);
     }
 
-    // Método para processar o formulário e salvar no banco de dados
     public function store(Request $request)
     {
         $request->validate([
@@ -82,19 +88,22 @@ class ArticleController extends Controller
             'id_category' => ['required', 'exists:categories,id'],
         ]);
 
-        $imagePath = null;
         if ($request->hasFile('image')) {
-            // Primeiro, salvamos o arquivo e obtemos o caminho dele no S3
-            $path = Storage::disk('s3')->putFile('posts', $request->file('image'), 'public');
-
-            // Depois, usamos o método url() do Storage principal para gerar a URL completa
-            $imagePath = Storage::url($path);
+            if ($request->file('image')->isValid()) {
+                $filename = $request->file('image')->getClientOriginalName();
+                $path = $request->file('image')->store('homolog', ["disk" => "s3", 'visibility' => 'public']);
+                if ($path === false) {
+                    dd('Falha no upload para o S3');
+                }
+            }
+        } else {
+            dd('Nenhum arquivo chegou na request');
         }
 
         Post::create([
             'id_category' => $request->id_category,
             'title' => $request->title,
-            'image' => $imagePath,
+            'image' => $path,
             'body' => $request->body,
             'author' => $request->author,
             'qt_views' => 0,
@@ -102,8 +111,9 @@ class ArticleController extends Controller
         ]);
 
         $token = $request->input('token');
-        return redirect('/admin/articles?token=' . $token);
+        return redirect('/admin/articles?token=' . $token)->with('success', 'Artigo criado com sucesso!');
     }
+
 
     public function edit(string $id)
     {
@@ -112,45 +122,76 @@ class ArticleController extends Controller
         return view('articles.edit', ['article' => $article, 'categories' => $categories]);
     }
 
+
+
     public function update(Request $request, string $id)
     {
-        $request->validate([
-            'title' => ['required', 'string', 'max:255', 'unique:posts,title,' . $id],
-            'image' => ['nullable', 'image'],
-            'body' => ['required', 'string'],
-            'author' => ['required', 'string'],
-            'id_category' => ['required', 'exists:categories,id'],
-        ]);
-
-        $article = Post::findOrFail($id);
-
-        if ($request->hasFile('image')) {
-            // Verifica se a imagem antiga existe antes de tentar deletar
-            if ($article->image) {
-                // A imagem antiga tem o caminho completo (URL), então precisamos extrair o caminho no S3
-                $path = str_replace(Storage::url(''), '', $article->image);
-                Storage::disk('s3')->delete($path);
-            }
-            $imagePath = Storage::disk('s3')->putFile('posts', $request->file('image'), 'public');
-            $article->image = Storage::url($imagePath); // Salva a URL completa
+        try {
+            $request->validate([
+                'title' => ['required', 'string', 'max:255', 'unique:posts,title,' . $id],
+                'image' => ['nullable', 'image'], // A regra 'image' valida se o arquivo é uma imagem
+                'body' => ['required', 'string'],
+                'author' => ['required', 'string'],
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            dd($e->errors());
         }
 
-        $article->update($request->except('image'));
-        
+        $article = Post::findOrFail($id);
+        $imagePath = $article->image;
+        if ($request->hasFile('image') && $request->file('image')->isValid()) {
+
+            // Deleta a imagem antiga do bucket, se existir
+            if ($imagePath) {
+                dd('existe imagem');
+                $filename = $request->file('image')->getClientOriginalName();
+                $delete = Storage::exists($imagePath);
+
+                if ($delete === true) {
+                    Storage::delete($imagePath);
+                }
+            } else {
+                // dd('não existe imagem');
+            }
+
+            // Faz upload da nova imagem usando store() no S3
+            $filename = $request->file('image')->getClientOriginalName();
+            $path = $request->file('image')->store(
+                'homolog',
+                ['disk' => 's3', 'visibility' => 'public']
+            );
+            if ($path === false) {
+                return back()->with('error', 'Falha no upload da nova imagem para o S3');
+            }
+        }
+
+        $article->update([
+            'title'       => $request->title,
+            'body'        => $request->body,
+            'image'       => $path ?? $imagePath,  
+            'author'      => $request->author,
+            'id_category' => $article->id_category,
+        ]);
+
         $token = $request->input('token');
-        return redirect('/articles/' . $article->id . '/edit?token=' . $token)->with('success', 'Artigo atualizado com sucesso!');
+        return redirect('/admin/articles?token=' . $token)
+            ->with('success', 'Artigo atualizado com sucesso!');
     }
+
 
     public function destroy(string $id)
     {
         $article = Post::findOrFail($id);
-        // Verifica se a imagem existe antes de tentar deletar
-        if ($article->image) {
-            $path = str_replace(Storage::url(''), '', $article->image);
-            Storage::disk('s3')->delete($path);
+        $imagePath = $article->image;
+        // Deleta a imagem do S3, se existir
+        if ($imagePath) {
+            $delete = Storage::exists($imagePath);
+            if ($delete === true) {
+                Storage::delete($imagePath);
+            }
         }
         $article->delete();
-        return redirect('/articles');
+        return redirect('/admin/articles');
     }
 
     // Novo método para incrementar a contagem de e-mails

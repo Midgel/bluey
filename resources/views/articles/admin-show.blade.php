@@ -32,7 +32,7 @@
                 <!-- Imagem em Destaque -->
                 <div class="mb-8">
                     @if(!empty($article->image))
-                        <img src="{{ $article->image }}" alt="{{ $article->title }}"
+                        <img src="{{ Storage::disk('s3')->url($article->image) }}" alt="{{ $article->title }}"
                             class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300" />
                     @else
                         <img src="{{ asset('images/dog-care.jpg') }}" alt="{{ $article->title }}"
