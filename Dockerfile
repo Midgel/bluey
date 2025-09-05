@@ -19,12 +19,13 @@ COPY composer.json composer.lock ./
 
 # Instala o Composer e as dependências
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
 # Copia o restante da aplicação
 COPY . .
 
 # Expõe a porta 9000 para a comunicação com o servidor web (Nginx/Apache)
+EXPOSE 8000
 EXPOSE 9000
 
 # Comando para iniciar o PHP-FPM quando o contêiner rodar
