@@ -1,19 +1,18 @@
 services:
-  app:
-    build: .
-    container_name: bluey
-    restart: always
-    user: "1000:1000"
-    volumes:
-      - .:/var/www/html
-    
-  web:
-    image: nginx:alpine
-    container_name: bluey-web
-    restart: always
-    ports:
-      - "80:80"
-      - "9000:9000"
-    volumes:
-      - .:/var/www/html
-      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    app:
+        build: .
+        container_name: bluey
+        restart: always
+        volumes:
+            - .:/var/www/html
+  
+    web:
+        image: nginx:alpine
+        container_name: bluey-web
+        restart: always
+        ports:
+            - "80:80"
+        volumes:
+            - .:/var/www/html
+            - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+

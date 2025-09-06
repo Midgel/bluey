@@ -25,6 +25,9 @@ RUN composer install --no-dev --no-interaction --no-autoloader --no-scripts
 # Copia o restante da aplicação
 COPY . .
 
+RUN chown -R www-data:www-data storage bootstrap/cache && \
+    chmod -R 775 storage bootstrap/cache
+
 # Expõe a porta 9000 para a comunicação com o servidor web (Nginx/Apache)
 EXPOSE 9000
 
