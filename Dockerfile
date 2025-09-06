@@ -5,7 +5,6 @@ FROM php:8.2-fpm-alpine
 # curl, pdo_mysql e pdo_sqlite são essenciais
 # zip, gd, e outras são comuns em apps Laravel
 RUN apk add --no-cache \
-    curl \
     mysql-client \
     zip \
     libzip-dev \
@@ -22,11 +21,11 @@ COPY composer.json composer.lock ./
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 RUN composer install --no-dev --no-interaction --no-autoloader --no-scripts
 
+
 # Copia o restante da aplicação
 COPY . .
 
 # Expõe a porta 9000 para a comunicação com o servidor web (Nginx/Apache)
-EXPOSE 8000
 EXPOSE 9000
 
 # Comando para iniciar o PHP-FPM quando o contêiner rodar
