@@ -37,4 +37,4 @@ jobs:
         # Etapa 6: Atualiza o serviço do ECS para usar a nova imagem
       - name: Atualizar o serviço do ECS
         run: |
-          aws ecs update-service --cluster bluey-ecs-cluster --service bluey-image-task-service-li8f2wah --force-new-deployment
+          aws ecs update-service --cluster bluey-ecs-cluster --service bluey-image-tasks-service-wpjtv72f --force-new-deployment
