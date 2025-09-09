@@ -30,16 +30,30 @@ jobs:
         run: |
           docker build -t docker/bluey .
         
-      # Etapa 4: Tagueia a imagem Docker  
+      # Etapa 5: Tagueia a imagem Docker  
       - name: Tagear imagem
         run: |
           docker tag docker/bluey:latest 706643784645.dkr.ecr.us-east-2.amazonaws.com/docker/bluey:latest
 
-      # Etapa 5: Envia a imagem construída para o ECR
+      # Etapa 6: Envia a imagem construída para o ECR
       - name: Enviar a imagem Docker para o ECR
         run: docker push 706643784645.dkr.ecr.us-east-2.amazonaws.com/docker/bluey:latest
 
-        # Etapa 6: Atualiza o serviço do ECS para usar a nova imagem
+      # Etapa 7: Constrói a imagem Docker NGINX
+      - name: Construir e taguear a imagem Docker NGINX
+        run: |
+          docker build -t docker/bluey-nginx ./nginx-docker
+        
+      # Etapa 8: Tagueia a imagem Docker NGINX
+      - name: Tagear imagem
+        run: |
+          docker tag docker/bluey-nginx:latest 706643784645.dkr.ecr.us-east-2.amazonaws.com/docker/bluey-nginx:latest
+
+      # Etapa 9: Envia a imagem construída para o ECR NGINX
+      - name: Enviar a imagem Docker para o ECR
+        run: docker push 706643784645.dkr.ecr.us-east-2.amazonaws.com/docker/bluey-nginx:latest
+
+      # Etapa 610 Atualiza o serviço do ECS para usar a nova imagem
       - name: Atualizar o serviço do ECS
         run: |
           aws ecs update-service --cluster bluey-ecs-cluster --service bluey-image-tasks-service-wpjtv72f --force-new-deployment
