@@ -23,16 +23,21 @@ jobs:
 
       # Etapa 3: Autentica o Docker no repositório ECR da AWS
       - name: Login no ECR da AWS
-        run: aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 706643784645.dkr.ecr.us-east-2.amazonaws.com/docker/bluey
+        run: aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 706643784645.dkr.ecr.us-east-2.amazonaws.com
 
-      # Etapa 4: Constrói e tagueia a imagem Docker
+      # Etapa 4: Constrói a imagem Docker
       - name: Construir e taguear a imagem Docker
         run: |
-          docker build -t 706643784645.dkr.ecr.us-east-2.amazonaws.com/docker/bluey .
+          docker build -t docker/bluey .
+        
+      # Etapa 4: Tagueia a imagem Docker  
+      - name: Tagear imagem
+        run: |
+          docker tag docker/bluey:latest 706643784645.dkr.ecr.us-east-2.amazonaws.com/docker/bluey:latest
 
       # Etapa 5: Envia a imagem construída para o ECR
       - name: Enviar a imagem Docker para o ECR
-        run: docker push 706643784645.dkr.ecr.us-east-2.amazonaws.com/docker/bluey
+        run: docker push 706643784645.dkr.ecr.us-east-2.amazonaws.com/docker/bluey:latest
 
         # Etapa 6: Atualiza o serviço do ECS para usar a nova imagem
       - name: Atualizar o serviço do ECS
