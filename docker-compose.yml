@@ -1,6 +1,8 @@
 services:
     app:
-        build: .
+        build: 
+            context: .
+            dockerfile: Dockerfile
         container_name: bluey
         restart: always
         volumes:
@@ -10,7 +12,6 @@ services:
         build:
             context: ./nginx-docker
             dockerfile: Dockerfile
-        image: nginx:alpine
         container_name: bluey-web
         restart: always
         ports:
