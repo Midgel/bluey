@@ -55,3 +55,5 @@ Route::get('/test-s3', function () {
     Storage::disk('s3')->put('teste.txt', 'Hello AWS S3!');
     return 'Upload feito!';
 });
+
+Route::get('/health', fn () => response()->noContent());

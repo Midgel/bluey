@@ -1,8 +1,8 @@
-FROM nginx:1.25.3-alpine
+FROM nginx:alpine
 
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY . /var/www/html
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 WORKDIR /var/www/html
+COPY . .
 EXPOSE 80
 
 CMD ["nginx", "-g", "daemon off;"]

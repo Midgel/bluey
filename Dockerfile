@@ -1,5 +1,5 @@
 # Usa uma imagem base com PHP e FPM, ideal para servidores web
-FROM php:8.2-fpm-alpine
+FROM php:8.2-fpm
 
 # Instala as dependências do sistema e extensões PHP necessárias
 # curl, pdo_mysql e pdo_sqlite são essenciais
