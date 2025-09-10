@@ -1,36 +1,24 @@
-# Usa uma imagem base com PHP e FPM, ideal para servidores web
 FROM php:8.2-fpm
 
-# Instala as dependências do sistema e extensões PHP necessárias
-# curl, pdo_mysql e pdo_sqlite são essenciais
-# zip, gd, e outras são comuns em apps Laravel
-RUN apk add --no-cache \
-    mysql-client \
-    zip \
-    libzip-dev \
-    && docker-php-ext-install pdo_mysql zip
+# Sistema e extensões necessárias
+RUN apt-get update && apt-get install -y \
+    libpng-dev libjpeg-dev libfreetype6-dev zip git unzip curl libonig-dev libzip-dev \
+ && docker-php-ext-configure gd --with-freetype --with-jpeg \
+ && docker-php-ext-install gd pdo pdo_mysql zip opcache \
+ && rm -rf /var/lib/apt/lists/*
 
-# Define o diretório de trabalho dentro do contêiner
+# Composer
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
 WORKDIR /var/www/html
-
-# Copia apenas os arquivos do Composer para aproveitar o cache
-COPY composer.json composer.lock ./
-
-
-# Instala o Composer e as dependências
-RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
-RUN composer install --no-dev --no-interaction --no-autoloader --no-scripts
-
-
-# Copia o restante da aplicação
 COPY . .
 
-RUN chown -R www-data:www-data storage bootstrap/cache && \
-    chmod -R 775 storage bootstrap/cache
+# Dependências do Laravel
+RUN composer install --no-dev --optimize-autoloader --no-interaction \
+ && php artisan config:clear \
+ && php artisan route:clear \
+ && php artisan view:clear \
+ && chown -R www-data:www-data storage bootstrap/cache
 
-# Expõe a porta 9000 para a comunicação com o servidor web (Nginx/Apache)
 EXPOSE 9000
-
-# Comando para iniciar o PHP-FPM quando o contêiner rodar
 CMD ["php-fpm"]
-
