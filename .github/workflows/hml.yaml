@@ -39,8 +39,9 @@ jobs:
 
       # Etapa 6: Envia a imagem construída para o ECR
       - name: Enviar a imagem Docker para o ECR
-        run: docker push 706643784645.dkr.ecr.us-east-2.amazonaws.com/laravel-app:latest
-             docker push 706643784645.dkr.ecr.us-east-2.amazonaws.com/nginx-proxy:latest
+        run: |
+            docker push 706643784645.dkr.ecr.us-east-2.amazonaws.com/laravel-app:latest
+            docker push 706643784645.dkr.ecr.us-east-2.amazonaws.com/nginx-proxy:latest
 
 
       # Etapa 7 Atualiza o serviço do ECS para usar a nova imagem
