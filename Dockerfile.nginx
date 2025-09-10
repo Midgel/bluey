@@ -1,0 +1,17 @@
+FROM nginx:alpine
+
+# Remove configs padrão para evitar conflito
+RUN rm /etc/nginx/conf.d/*
+
+# Copia a configuração customizada
+COPY ./nginx.conf /etc/nginx/conf.d/default.conf
+
+# Copia apenas os arquivos públicos do Laravel
+WORKDIR /var/www/html
+COPY ./public ./public
+
+# Expõe apenas porta 80
+EXPOSE 80
+
+# Comando para rodar o Nginx em foreground
+CMD ["nginx", "-g", "daemon off;"]
