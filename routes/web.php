@@ -56,4 +56,6 @@ Route::get('/test-s3', function () {
     return 'Upload feito!';
 });
 
-Route::get('/health', fn () => response()->noContent());
+Route::get('/health', function () {
+    return response()->json(['status' => 'ok'], 200);
+});
