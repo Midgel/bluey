@@ -18,7 +18,7 @@ RUN chown -R www-data:www-data storage bootstrap/cache && \
 
 # Dependências do Laravel
 RUN composer install --no-dev --optimize-autoloader --no-interaction \
- && php artisan config:clear \
+ && php artisan config:cache \
  && php artisan route:clear \
  && php artisan view:clear \
  && chown -R www-data:www-data storage bootstrap/cache
