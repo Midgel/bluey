@@ -84,7 +84,7 @@ COPY . .
 COPY --from=node-builder /app/public/build ./public/build
 
 # Finalizar instalação do composer
-RUN composer dump-autoloader --optimize
+RUN composer dump-autoload --optimize
 
 # Comandos Laravel
 RUN php artisan config:cache \
