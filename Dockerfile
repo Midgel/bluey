@@ -24,6 +24,8 @@ RUN composer install --no-dev --optimize-autoloader --no-interaction \
 RUN chown -R www-data:www-data storage bootstrap/cache \
  && chmod -R 775 storage bootstrap/cache
 
+RUN rm -f /etc/nginx/conf.d/*
+
 # Copia configuração do Nginx
 COPY ./nginx.conf /etc/nginx/conf.d/default.conf
 
