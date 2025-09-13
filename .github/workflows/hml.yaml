@@ -27,7 +27,7 @@ jobs:
 
       # Etapa 4: Constrói a imagem Docker
       - name: Construir e taguear a imagem Docker
-        run: docker build -t bluey-app:latest .
+        run: docker build -f Dockerfile -t bluey-app:latest .
 
       # Etapa 5: Tagueia a imagem Docker
       - name: Tagear imagem
