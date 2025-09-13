@@ -1,43 +1,176 @@
+# name: CI/CD-bluey
+
+# on:
+#   push:
+#     branches:
+#       - hml
+
+# jobs:
+#   build_and_deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       # Etapa 1: Faz o 'checkout' do seu código do GitHub para o ambiente do runner
+#       - name: Checkout do código
+#         uses: actions/checkout@v4
+
+#       # Etapa 2: Configura as credenciais da AWS usando as secrets do GitHub
+#       - name: Configurar as credenciais da AWS
+#         uses: aws-actions/configure-aws-credentials@v3
+#         with:
+#           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+#           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+#           aws-region: us-east-2
+
+#       # Etapa 3: Autentica o Docker no repositório ECR da AWS
+#       - name: Login no ECR da AWS
+#         run: aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 706643784645.dkr.ecr.us-east-2.amazonaws.com
+
+#       # Etapa 4: Constrói a imagem Docker
+#       - name: Construir e taguear a imagem Docker
+#         run: docker build -f Dockerfile -t bluey-app:latest .
+
+#       # Etapa 5: Tagueia a imagem Docker
+#       - name: Tagear imagem
+#         run: docker tag bluey-app:latest 706643784645.dkr.ecr.us-east-2.amazonaws.com/bluey-app:latest
+
+#       # Etapa 6: Envia a imagem construída para o ECR
+#       - name: Enviar a imagem Docker para o ECR
+#         run: docker push 706643784645.dkr.ecr.us-east-2.amazonaws.com/bluey-app:latest
+
+#       # Etapa 7 Atualiza o serviço do ECS para usar a nova imagem
+#       - name: Atualizar o serviço do ECS
+#         run: |
+#           aws ecs update-service --cluster bluey-cluster --service bluey-task-service-q0vjidrn --force-new-deployment
+
 name: CI/CD-bluey
 
 on:
   push:
     branches:
       - hml
+  pull_request:
+    branches:
+      - hml
+
+env:
+  AWS_REGION: us-east-2
+  ECR_REPOSITORY: bluey-app
+  ECR_REGISTRY: 706643784645.dkr.ecr.us-east-2.amazonaws.com
+  ECS_CLUSTER: bluey-cluster
+  ECS_SERVICE: bluey-task-service-q0vjidrn
 
 jobs:
   build_and_deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
     steps:
-      # Etapa 1: Faz o 'checkout' do seu código do GitHub para o ambiente do runner
+      # Etapa 1: Checkout do código
       - name: Checkout do código
         uses: actions/checkout@v4
 
-      # Etapa 2: Configura as credenciais da AWS usando as secrets do GitHub
+      # Etapa 2: Configurar credenciais AWS
       - name: Configurar as credenciais da AWS
-        uses: aws-actions/configure-aws-credentials@v3
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: us-east-2
+          aws-region: ${{ env.AWS_REGION }}
 
-      # Etapa 3: Autentica o Docker no repositório ECR da AWS
-      - name: Login no ECR da AWS
-        run: aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin 706643784645.dkr.ecr.us-east-2.amazonaws.com
+      # Etapa 3: Login no ECR
+      - name: Login no Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
 
-      # Etapa 4: Constrói a imagem Docker
-      - name: Construir e taguear a imagem Docker
-        run: docker build -f Dockerfile -t bluey-app:latest .
-
-      # Etapa 5: Tagueia a imagem Docker
-      - name: Tagear imagem
-        run: docker tag bluey-app:latest 706643784645.dkr.ecr.us-east-2.amazonaws.com/bluey-app:latest
-
-      # Etapa 6: Envia a imagem construída para o ECR
-      - name: Enviar a imagem Docker para o ECR
-        run: docker push 706643784645.dkr.ecr.us-east-2.amazonaws.com/bluey-app:latest
-
-      # Etapa 7 Atualiza o serviço do ECS para usar a nova imagem
-      - name: Atualizar o serviço do ECS
+      # Etapa 4: Definir variáveis da imagem
+      - name: Definir tag da imagem
+        id: image-tag
         run: |
-          aws ecs update-service --cluster bluey-cluster --service bluey-task-service-q0vjidrn --force-new-deployment
+          IMAGE_TAG=${GITHUB_SHA:0:8}
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "FULL_IMAGE_URI=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # Etapa 5: Verificar se o repositório ECR existe
+      - name: Verificar repositório ECR
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} || \
+          aws ecr create-repository --repository-name ${{ env.ECR_REPOSITORY }} --region ${{ env.AWS_REGION }}
+
+      # Etapa 6: Build da imagem Docker
+      - name: Construir imagem Docker
+        run: |
+          docker build \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --cache-from ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest \
+            -t ${{ steps.image-tag.outputs.FULL_IMAGE_URI }} \
+            -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest \
+            .
+
+      # Etapa 7: Testar a imagem (health check)
+      - name: Testar imagem Docker
+        run: |
+          # Iniciar container em background
+          docker run -d --name test-container -p 8080:80 ${{ steps.image-tag.outputs.FULL_IMAGE_URI }}
+          
+          # Aguardar container estar pronto
+          sleep 30
+          
+          # Testar health check
+          curl -f http://localhost:8080/health || exit 1
+          
+          # Limpar
+          docker stop test-container
+          docker rm test-container
+
+      # Etapa 8: Push para ECR
+      - name: Push imagem para ECR
+        run: |
+          docker push ${{ steps.image-tag.outputs.FULL_IMAGE_URI }}
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+
+      # Etapa 9: Atualizar ECS com verificação
+      - name: Atualizar serviço ECS
+        run: |
+          # Fazer o deploy
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment
+
+          # Aguardar deployment estabilizar
+          echo "Aguardando deployment estabilizar..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }}
+
+      # Etapa 10: Verificar deploy
+      - name: Verificar deployment
+        run: |
+          # Obter status do serviço
+          SERVICE_STATUS=$(aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --query 'services[0].deployments[0].status' \
+            --output text)
+          
+          if [ "$SERVICE_STATUS" != "PRIMARY" ]; then
+            echo "❌ Deployment falhou! Status: $SERVICE_STATUS"
+            exit 1
+          else
+            echo "✅ Deployment realizado com sucesso!"
+          fi
+
+      # Etapa 11: Limpeza de imagens antigas (opcional)
+      - name: Limpar imagens antigas do ECR
+        continue-on-error: true
+        run: |
+          # Manter apenas as 10 imagens mais recentes
+          aws ecr list-images \
+            --repository-name ${{ env.ECR_REPOSITORY }} \
+            --filter tagStatus=UNTAGGED \
+            --query 'imageIds[?imageDigest!=null]' \
+            --output json | \
+          jq '.[:(-10)]' | \
+          aws ecr batch-delete-image \
+            --repository-name ${{ env.ECR_REPOSITORY }} \
+            --image-ids file:///dev/stdin || true
