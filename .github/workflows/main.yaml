@@ -1,19 +1,19 @@
-name: CI/CD-bluey
+name: CI/CD-bluey-PROD
 
 on:
   push:
     branches:
-      - hml
+      - main
   pull_request:
     branches:
-      - hml
+      - main
 
 env:
   AWS_REGION: us-east-2
-  ECR_REPOSITORY: bluey-app
+  ECR_REPOSITORY: bluey-app-prod
   ECR_REGISTRY: 706643784645.dkr.ecr.us-east-2.amazonaws.com
-  ECS_CLUSTER: bluey-cluster
-  ECS_SERVICE: bluey-task-service-q0vjidrn
+  ECS_CLUSTER: bluey-cluster-prod
+  ECS_SERVICE: bluey-task-prod-service
 
 jobs:
   build_and_deploy:
