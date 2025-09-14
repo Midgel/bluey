@@ -1,0 +1,117 @@
+name: CI/CD-bluey
+
+on:
+  push:
+    branches:
+      - hml
+  pull_request:
+    branches:
+      - hml
+
+env:
+  AWS_REGION: us-east-2
+  ECR_REPOSITORY: bluey-app
+  ECR_REGISTRY: 706643784645.dkr.ecr.us-east-2.amazonaws.com
+  ECS_CLUSTER: bluey-cluster
+  ECS_SERVICE: bluey-task-service-q0vjidrn
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    
+    steps:
+      # Etapa 1: Checkout do código
+      - name: Checkout do código
+        uses: actions/checkout@v4
+
+      # Etapa 2: Configurar credenciais AWS
+      - name: Configurar as credenciais da AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # Etapa 3: Login no ECR
+      - name: Login no Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      # Etapa 4: Definir variáveis da imagem
+      - name: Definir tag da imagem
+        id: image-tag
+        run: |
+          IMAGE_TAG=${GITHUB_SHA:0:8}
+          echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_OUTPUT
+          echo "FULL_IMAGE_URI=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      # Etapa 5: Verificar se o repositório ECR existe
+      - name: Verificar repositório ECR
+        run: |
+          aws ecr describe-repositories --repository-names ${{ env.ECR_REPOSITORY }} || \
+          aws ecr create-repository --repository-name ${{ env.ECR_REPOSITORY }} --region ${{ env.AWS_REGION }}
+
+      # Etapa 6: Build da imagem Docker
+      - name: Construir imagem Docker
+        run: |
+          docker build \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --cache-from ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest \
+            -t ${{ steps.image-tag.outputs.FULL_IMAGE_URI }} \
+            -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest \
+            .
+
+      # Etapa 7: Testar a imagem (health check)
+      - name: Testar imagem Docker
+        run: |
+          # Iniciar container em background
+          docker run -d --name test-container -p 8080:80 ${{ steps.image-tag.outputs.FULL_IMAGE_URI }}
+          
+          # Aguardar container estar pronto
+          sleep 30
+          
+          # Testar health check
+          curl -f http://localhost:8080/health || exit 1
+          
+          # Limpar
+          docker stop test-container
+          docker rm test-container
+
+      # Etapa 8: Push para ECR
+      - name: Push imagem para ECR
+        run: |
+          docker push ${{ steps.image-tag.outputs.FULL_IMAGE_URI }}
+          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:latest
+
+      # Etapa 9: Atualizar ECS com verificação
+      - name: Atualizar serviço ECS
+        run: |
+          # Fazer o deploy
+          aws ecs update-service \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --service ${{ env.ECS_SERVICE }} \
+            --force-new-deployment
+
+          # Aguardar deployment estabilizar
+          echo "Aguardando deployment estabilizar..."
+          aws ecs wait services-stable \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }}
+
+      # Etapa 10: Verificar deploy
+      - name: Verificar deployment
+        run: |
+          # Obter status do serviço
+          SERVICE_STATUS=$(aws ecs describe-services \
+            --cluster ${{ env.ECS_CLUSTER }} \
+            --services ${{ env.ECS_SERVICE }} \
+            --query 'services[0].deployments[0].status' \
+            --output text)
+          
+          if [ "$SERVICE_STATUS" != "PRIMARY" ]; then
+            echo "❌ Deployment falhou! Status: $SERVICE_STATUS"
+            exit 1
+          else
+            echo "✅ Deployment realizado com sucesso!"
+          fi

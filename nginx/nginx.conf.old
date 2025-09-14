@@ -1,0 +1,25 @@
+server {
+    listen 80;
+    server_name _;
+
+    root /var/www/html/public;
+    index index.php index.html;
+
+    # Rota principal → se não for arquivo, cai no index.php
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # Repassa PHP para o container do Laravel (php-fpm)
+    location ~ \.php$ {
+        include fastcgi_params;
+        fastcgi_pass 127.0.0.1:9000;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    }
+
+    # Otimizações
+    client_max_body_size 21M;
+    sendfile on;
+    gzip on;
+}
