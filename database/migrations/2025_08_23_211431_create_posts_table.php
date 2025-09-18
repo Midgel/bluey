@@ -18,8 +18,8 @@ return new class extends Migration
             $table->string('image');
             $table->text('body');
             $table->string('author');
-            $table->integer('qt_views');
-            $table->integer('qt_emails');
+            $table->integer('qt_views')->default(0);
+            $table->integer('qt_emails')->default(0);
             $table->timestamps();
         });
     }

@@ -17,6 +17,7 @@ class ArticleController extends Controller
         return view('welcome', ['articles' => $articles, 'categories' => $categories]);
     }
 
+    //Rota para a guia "sobre"
     public function about()
     {
         return view('about');
@@ -141,7 +142,7 @@ class ArticleController extends Controller
         $imagePath = $article->image;
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
 
-            // Deleta a imagem antiga do bucket, se existir
+            // Deleta a imagem antiga do bucket se existir
             if ($imagePath) {
                 dd('existe imagem');
                 $filename = $request->file('image')->getClientOriginalName();
@@ -194,7 +195,7 @@ class ArticleController extends Controller
         return redirect('/admin/articles');
     }
 
-    // Novo método para incrementar a contagem de e-mails
+    // Método para incrementar a contagem de e-mails
     public function incrementEmail(string $id)
     {
         $article = Post::findOrFail($id);
