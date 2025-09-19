@@ -83,7 +83,7 @@ class ArticleController extends Controller
     {
         $request->validate([
             'title' => ['required', 'string', 'max:255', 'unique:posts'],
-            'image' => ['nullable', 'image'],
+            'image' => ['nullable', 'image'], // A regra 'image' valida se o arquivo é uma imagem
             'body' => ['required', 'string'],
             'author' => ['required', 'string'],
             'id_category' => ['required', 'exists:categories,id'],
@@ -144,7 +144,7 @@ class ArticleController extends Controller
 
             // Deleta a imagem antiga do bucket se existir
             if ($imagePath) {
-                dd('existe imagem');
+                // dd('existe imagem');
                 $filename = $request->file('image')->getClientOriginalName();
                 $delete = Storage::exists($imagePath);
 
