@@ -75,7 +75,7 @@ Nginx - Servidor web
 
 Testes
 
-PHPUnit - Framework de testes e 
+PHPUnit - Framework de testes   
 Laravel Testing Suite - Ferramentas de teste integradas
 
 🚀 Instalação e Configuração
@@ -98,8 +98,6 @@ Ano: 2025
 
 Contato
 
-📧 Email: [midgel_ribeiro@hotmail.com]
-
-💼 LinkedIn: [https://www.linkedin.com/in/midgel-borges-314616214]
-
+📧 Email: [midgel_ribeiro@hotmail.com]  
+💼 LinkedIn: [https://www.linkedin.com/in/midgel-borges-314616214]  
 🐙 GitHub: [https://github.com/Midgel]
