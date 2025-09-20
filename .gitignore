@@ -22,16 +22,13 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
-
 .git
 .gitignore
 README.md
-.env
 .env.example
 .editorconfig
 .php_cs
 .php_cs.cache
-.phpunit.result.cache
 Dockerfile
 .dockerignore
 docker-compose.yml
