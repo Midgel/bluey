@@ -118,11 +118,10 @@ class CreateArticleTest extends TestCase
 
     public function test_it_blocks_access_without_valid_token()
     {
-        // Arrange
         $category = Category::create(['description' => 'Teste']);
         $file = UploadedFile::fake()->image('test.jpg');
 
-        // Act - Tentar acessar sem token
+        // Ação - Tentar acessar sem token
         $response = $this->post('/admin/articles', [
             'title' => 'Teste sem token',
             'body' => 'Conteúdo...',
@@ -133,7 +132,7 @@ class CreateArticleTest extends TestCase
             'qt_emails' => 0,
         ]);
 
-        // Assert - Deve retornar erro 401
+        // Assertividade - Deve retornar erro 401
         $response->assertStatus(401);
         $response->assertSeeText('Acesso negado. Token de segurança não encontrado ou inválido.');
 
