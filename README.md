@@ -91,10 +91,10 @@ Para instalá-lo localmente, basta executar o comando git clone https://github.c
 
 👨‍💻 Desenvolvedor
 
-Desenvolvido por: Midgel RIbeiro Borges
-Curso: Engenharia de Software Full Stack
-Instituição: Pontífica Univesidade Católica do Rio Grande do Sul
-Ano: 2025
+Desenvolvido por: Midgel Ribeiro Borges 
+Curso: Engenharia de Software Full Stack 
+Instituição: Pontífica Univesidade Católica do Rio Grande do Sul 
+Ano: 2025 
 
 Contato
 
