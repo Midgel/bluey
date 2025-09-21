@@ -50,12 +50,15 @@ Route::post('/admin/articles/update/{id}', [ArticleController::class, 'update'])
 Route::delete('/admin/articles/{id}', [ArticleController::class, 'destroy'])->middleware('token.access');
 
 
+//Rotas de teste
 
+// Rota de teste para verificar upload no S3 (apenas para desenvolvimento)
 Route::get('/test-s3', function () {
     Storage::disk('s3')->put('teste.txt', 'Hello AWS S3!');
     return 'Upload feito!';
 });
 
+// Rota de teste para verificar se a aplicação está rodando (helath check)
 Route::get('/health', function () {
     return response()->json(['status' => 'ok'], 200);
 });

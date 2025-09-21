@@ -6,7 +6,7 @@
 @else
     <!-- Grade de Artigos -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
-        <!-- Loop para exibir os artigos dinamicamente -->
+        <!-- Loop para exibir os artigos -->
         @foreach ($articles as $article)
             <div
                 class="group hover:shadow-xl transition-all duration-300 border-0 shadow-md hover:-translate-y-2 bg-card overflow-hidden cursor-pointer">
@@ -29,7 +29,7 @@
                             </span>
                         </div>
                     </div>
-                    <!-- Conteúdo do Cartão -->
+                    <!-- Conteúdo do Card -->
                     <div class="flex flex-col p-6 space-y-3">
                         <h3
                             class="text-xl font-bold text-foreground group-hover:text-bluey-primary transition-colors line-clamp-2">
@@ -39,7 +39,7 @@
                             {{ Str::words($article->body, 20) }}
                         </p>
                     </div>
-                    <!-- Rodapé do Cartão com Autor e Data -->
+                    <!-- Rodapé do Card com Autor e Data -->
                     <div class="p-6 pt-0">
                         <div class="flex items-center space-x-4 text-sm text-muted-foreground">
                             <span>{{ $article->author }}</span>

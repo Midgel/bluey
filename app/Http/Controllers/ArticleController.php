@@ -17,6 +17,7 @@ class ArticleController extends Controller
         return view('welcome', ['articles' => $articles, 'categories' => $categories]);
     }
 
+    //Rota para a guia "sobre"
     public function about()
     {
         return view('about');
@@ -74,23 +75,27 @@ class ArticleController extends Controller
 
     public function create()
     {
+        //Envio das categorias para popular o select no form
         $categories = Category::all();
         return view('articles.create', ['categories' => $categories]);
     }
 
     public function store(Request $request)
     {
+        //Validação dos dados do formulário
         $request->validate([
             'title' => ['required', 'string', 'max:255', 'unique:posts'],
-            'image' => ['nullable', 'image'],
+            'image' => ['nullable', 'image'], // A regra 'image' valida se o arquivo é uma imagem
             'body' => ['required', 'string'],
             'author' => ['required', 'string'],
             'id_category' => ['required', 'exists:categories,id'],
         ]);
 
+        //Validação da imagem
         if ($request->hasFile('image')) {
             if ($request->file('image')->isValid()) {
                 $filename = $request->file('image')->getClientOriginalName();
+                // Faz upload da imagem usando store() no S3
                 $path = $request->file('image')->store('homolog', ["disk" => "s3", 'visibility' => 'public']);
                 if ($path === false) {
                     dd('Falha no upload para o S3');
@@ -100,6 +105,7 @@ class ArticleController extends Controller
             dd('Nenhum arquivo chegou na request');
         }
 
+        //Criação do artigo no banco
         Post::create([
             'id_category' => $request->id_category,
             'title' => $request->title,
@@ -117,6 +123,7 @@ class ArticleController extends Controller
 
     public function edit(string $id)
     {
+        //Envio do artigo e das categorias para popular o select no form
         $article = Post::findOrFail($id);
         $categories = Category::all();
         return view('articles.edit', ['article' => $article, 'categories' => $categories]);
@@ -126,6 +133,7 @@ class ArticleController extends Controller
 
     public function update(Request $request, string $id)
     {
+        //Validação dos dados do formulário
         try {
             $request->validate([
                 'title' => ['required', 'string', 'max:255', 'unique:posts,title,' . $id],
@@ -137,13 +145,16 @@ class ArticleController extends Controller
             dd($e->errors());
         }
 
+        //Busca o artigo no banco
         $article = Post::findOrFail($id);
         $imagePath = $article->image;
+
+        //Validação da imagem
         if ($request->hasFile('image') && $request->file('image')->isValid()) {
 
-            // Deleta a imagem antiga do bucket, se existir
+            // Deleta a imagem antiga do bucket se existir
             if ($imagePath) {
-                dd('existe imagem');
+                // dd('existe imagem');
                 $filename = $request->file('image')->getClientOriginalName();
                 $delete = Storage::exists($imagePath);
 
@@ -165,6 +176,7 @@ class ArticleController extends Controller
             }
         }
 
+        //Atualização do artigo no banco
         $article->update([
             'title'       => $request->title,
             'body'        => $request->body,
@@ -181,8 +193,10 @@ class ArticleController extends Controller
 
     public function destroy(string $id)
     {
+        //Busca o artigo no banco
         $article = Post::findOrFail($id);
         $imagePath = $article->image;
+        
         // Deleta a imagem do S3, se existir
         if ($imagePath) {
             $delete = Storage::exists($imagePath);
@@ -194,7 +208,7 @@ class ArticleController extends Controller
         return redirect('/admin/articles');
     }
 
-    // Novo método para incrementar a contagem de e-mails
+    // Método para incrementar a contagem de e-mails
     public function incrementEmail(string $id)
     {
         $article = Post::findOrFail($id);

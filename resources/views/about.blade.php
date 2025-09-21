@@ -10,7 +10,6 @@
 
     <main class="py-12">
         <div class="container mx-auto px-4">
-            <!-- Hero Section -->
             <div class="text-center mb-16">
                 <h1 class="text-4xl md:text-5xl font-bold text-bluey-primary mb-6">
                     Sobre o BLUEY
@@ -21,7 +20,6 @@
                 </p>
             </div>
 
-            <!-- Mission Section -->
             <div class="grid md:grid-cols-2 gap-12 items-center mb-16">
                 <div>
                     <h2 class="text-3xl font-bold text-foreground mb-6">Nossa Missão</h2>
@@ -42,7 +40,6 @@
                 </div>
             </div>
 
-            <!-- Values Section -->
             <div class="mb-16">
                 <h2 class="text-3xl font-bold text-center text-foreground mb-12">
                     Nossos Valores
@@ -90,7 +87,6 @@
                 </div>
             </div>
 
-            <!-- What We Offer Section -->
             <div class="bg-card rounded-2xl p-8 md:p-12">
                 <h2 class="text-3xl font-bold text-center text-foreground mb-8">
                     O que Oferecemos
